@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -e
+set -e
 
 [ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
 [ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm_rpmb_ffa
@@ -66,5 +66,6 @@ echo "#################### BUILD DONE ####################"
 echo "cd output "
 echo "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios bl1.bin -machine virt,secure=on -d unimp -semihosting-config enable,target=native -serial tcp::5000,server,nowait -gdb tcp::1234"
 
+echo 
 echo "For secure UART debugging"
 echo "telnet 0 5000"
