@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-[ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
+[ ! -d 'u-boot' ] && git clone https://gitlab.denx.de/u-boot/custodians/u-boot-efi -b efi-2020-10 && mv u-boot-efi u-boot 
+#[ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
 [ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm_rpmb_ffa
 [ ! -d 'edk2' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2.git -b stmm_ffa
 [ ! -d 'optee_os' ] && git clone https://github.com/apalos/optee_os/ -b stmm_ffa_upstream
