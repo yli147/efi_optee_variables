@@ -52,10 +52,18 @@ popd
 
 # Build ATF
 pushd arm-trusted-firmware
-make PLAT=qemu SPD=opteed
+make PLAT=qemu BL32=../optee_os/out/arm-plat-vexpress/core/tee-header_v2.bin \
+	BL32_EXTRA1=../optee_os/out/arm-plat-vexpress/core/tee-pager_v2.bin \
+	BL32_EXTRA2=../optee_os/out/arm-plat-vexpress/core/tee-pageable_v2.bin \
+	BL33=../u-boot/u-boot.bin \
+	BL32_RAM_LOCATION=tdram SPD=opteed all fip
+
+	dd if=build/qemu/release/bl1.bin of=flash.bin bs=4096 conv=notrunc
+	dd if=build/qemu/release/fip.bin of=flash.bin seek=64 bs=4096 conv=notrunc
 popd
 
 mkdir -p output
+cp arm-trusted-firmware/flash.bin output
 cp arm-trusted-firmware/build/qemu/release/*.bin output
 cp optee_os/out/arm-plat-vexpress/core/tee-header_v2.bin output/bl32.bin
 cp optee_os/out/arm-plat-vexpress/core/tee-pager_v2.bin output/bl32_extra1.bin
@@ -65,7 +73,10 @@ cp u-boot/u-boot.bin output/bl33.bin
 echo 
 echo "#################### BUILD DONE ####################"
 echo "cd output "
+echo "SEMI-HOSTING:  "
 echo "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios bl1.bin -machine virt,secure=on -d unimp -semihosting-config enable,target=native -serial tcp::5000,server,nowait -gdb tcp::1234"
+echo "FIP: "
+echo "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios flash.bin -machine virt,secure=on -d unimp -serial tcp::5000,server,nowait -gdb tcp::1234"
 
 echo 
 echo "For secure UART debugging"
