@@ -1,25 +1,23 @@
-From 35faaed0af907b982bacc7a2a3f8791d97d7f4e6 Mon Sep 17 00:00:00 2001
+From af468bd0f837f58b854aea0fc571f780d9f47a27 Mon Sep 17 00:00:00 2001
 From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Date: Wed, 12 Aug 2020 14:30:17 +0300
-Subject: [PATCH 2/2] rpmb emulation hack. Breaks proper hardware support
+Date: Thu, 3 Sep 2020 09:28:04 +0300
+Subject: [PATCH] sd
 
 Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 ---
- arch/arm/include/asm/gpio.h     |   2 +-
- arch/arm/include/asm/gpio.h.rej |  11 +
- arch/arm/include/asm/ioctl.h    |   1 +
- configs/qemu_tfa_mm_defconfig   |  53 +++
- drivers/tee/optee/Makefile      |   1 +
- drivers/tee/optee/hmac_sha2.c   | 126 +++++++
- drivers/tee/optee/hmac_sha2.h   |  74 +++++
- drivers/tee/optee/rpmb.c        |  27 +-
- drivers/tee/optee/rpmb.h        |   1 +
- drivers/tee/optee/rpmb_emu.c    | 563 ++++++++++++++++++++++++++++++++
- drivers/tee/optee/rpmb_emu.h    | 141 ++++++++
- drivers/tee/optee/sha2.c        | 249 ++++++++++++++
- drivers/tee/optee/sha2.h        |  75 +++++
- 13 files changed, 1302 insertions(+), 22 deletions(-)
- create mode 100644 arch/arm/include/asm/gpio.h.rej
+ arch/arm/include/asm/gpio.h   |   3 +-
+ arch/arm/include/asm/ioctl.h  |   1 +
+ configs/qemu_tfa_mm_defconfig |  53 ++++
+ drivers/tee/optee/Makefile    |   1 +
+ drivers/tee/optee/hmac_sha2.c | 126 ++++++++
+ drivers/tee/optee/hmac_sha2.h |  74 +++++
+ drivers/tee/optee/rpmb.c      |  27 +-
+ drivers/tee/optee/rpmb.h      |   1 +
+ drivers/tee/optee/rpmb_emu.c  | 563 ++++++++++++++++++++++++++++++++++
+ drivers/tee/optee/rpmb_emu.h  | 141 +++++++++
+ drivers/tee/optee/sha2.c      | 249 +++++++++++++++
+ drivers/tee/optee/sha2.h      |  75 +++++
+ 12 files changed, 1292 insertions(+), 22 deletions(-)
  create mode 100644 arch/arm/include/asm/ioctl.h
  create mode 100644 configs/qemu_tfa_mm_defconfig
  create mode 100644 drivers/tee/optee/hmac_sha2.c
@@ -31,15 +29,16 @@ Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
  create mode 100644 drivers/tee/optee/sha2.h
 
 diff --git a/arch/arm/include/asm/gpio.h b/arch/arm/include/asm/gpio.h
-index 7dc87afb83a8..8eaad7ab3a27 100644
+index 6ecb876eda51..7609367884ff 100644
 --- a/arch/arm/include/asm/gpio.h
 +++ b/arch/arm/include/asm/gpio.h
-@@ -3,7 +3,7 @@
+@@ -3,7 +3,8 @@
  	!defined(CONFIG_ARCH_BCM6858) && !defined(CONFIG_ARCH_BCM63158) && \
  	!defined(CONFIG_ARCH_ROCKCHIP) && !defined(CONFIG_ARCH_ASPEED) && \
  	!defined(CONFIG_ARCH_U8500) && !defined(CONFIG_CORTINA_PLATFORM) && \
--	!defined(CONFIG_TARGET_BCMNS3)
-+	!defined(CONFIG_TARGET_BCMNS3) && !defined(CONFIG_ARCH_QEMU)
+-	!defined(CONFIG_TARGET_BCMNS3) && !defined(CONFIG_TARGET_TOTAL_COMPUTE)
++	!defined(CONFIG_TARGET_BCMNS3) && !defined(CONFIG_TARGET_TOTAL_COMPUTE) && \
++	!defined(CONFIG_ARCH_QEMU)
  #include <asm/arch/gpio.h>
  #endif
  #include <asm-generic/gpio.h>
@@ -1445,5 +1444,5 @@ index 000000000000..4ce0f3cd5231
 +#endif /* !SHA2_H */
 +
 -- 
-2.28.0.rc1
+2.28.0
 
