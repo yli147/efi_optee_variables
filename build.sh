@@ -3,18 +3,20 @@ set -e
 
 #[ ! -d 'u-boot' ] && git clone https://gitlab.denx.de/u-boot/custodians/u-boot-efi -b efi-2020-10 && mv u-boot-efi u-boot 
 [ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
-[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm_rpmb_ffa
-[ ! -d 'edk2' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2.git -b stmm_ffa
+[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2-platforms.git -b ffa_svc_optional_on_upstream
+[ ! -d 'edk2' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2.git -b ffa_svc_optional_on_upstream
+#[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm_rpmb_ffa
+#[ ! -d 'edk2' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2.git -b stmm_ffa
 [ ! -d 'optee_os' ] && git clone https://github.com/OP-TEE/optee_os.git -b master
 [ ! -d 'arm-trusted-firmware' ] && git clone https://github.com/ARM-software/arm-trusted-firmware.git -b master
 
-for i in u-boot edk2 edk2-platforms optee_os; do
-	pushd "$i"
-	git clean -d -f
-	git reset --hard
-	git pull --rebase
-	popd
-done
+#for i in u-boot edk2 edk2-platforms optee_os; do
+	#pushd "$i"
+	#git clean -d -f
+	#git reset --hard
+	#git pull --rebase
+	#popd
+#done
 
 # Build EDK2
 export WORKSPACE=$(pwd)
