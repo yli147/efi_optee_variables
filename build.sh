@@ -1,22 +1,21 @@
 #!/bin/bash
 set -e
 
-#[ ! -d 'u-boot' ] && git clone https://gitlab.denx.de/u-boot/custodians/u-boot-efi -b efi-2020-10 && mv u-boot-efi u-boot 
 [ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
 [ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2-platforms.git -b ffa_svc_optional_on_upstream
 [ ! -d 'edk2' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2.git -b ffa_svc_optional_on_upstream
-#[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm_rpmb_ffa
-#[ ! -d 'edk2' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2.git -b stmm_ffa
 [ ! -d 'optee_os' ] && git clone https://github.com/OP-TEE/optee_os.git -b master
 [ ! -d 'arm-trusted-firmware' ] && git clone https://github.com/ARM-software/arm-trusted-firmware.git -b master
+[ ! -d 'MSRSec' ] && git clone https://github.com/microsoft/MSRSec.git
 
-#for i in u-boot edk2 edk2-platforms optee_os; do
-	#pushd "$i"
-	#git clean -d -f
-	#git reset --hard
-	#git pull --rebase
-	#popd
-#done
+clean_dirs='u-boot edk2 edk2-platforms optee_os arm-trusted-firmware MSRSec'
+for i in $clean_dirs; do
+	pushd "$i"
+	git clean -d -f
+	git reset --hard
+	git pull --rebase
+	popd
+done
 
 # Build EDK2
 export WORKSPACE=$(pwd)
@@ -32,14 +31,47 @@ popd
 source edk2/edksetup.sh
 make -C edk2/BaseTools
 build -p $ACTIVE_PLATFORM -b RELEASE -a AARCH64 -t GCC5 -n `nproc` -D DO_X86EMU=TRUE
+cp Build/MmStandaloneRpmb/RELEASE_GCC5/FV/BL32_AP_MM.fd optee_os
 
-# Build OP-TEE
+# Build OP-TEE for the devkit
+if [ !-d 'optee_os/out/arm-plat-vexpress/export-ta_arm64']; then
+	pushd optee_os
+	export ARCH=arm
+	CROSS_COMPILE32=arm-linux-gnueabihf- make -j32 CFG_ARM64_core=y \
+		PLATFORM=vexpress-qemu_armv8a CFG_STMM_PATH=BL32_AP_MM.fd CFG_RPMB_FS=y \
+		CFG_RPMB_FS_DEV_ID=0 CFG_CORE_HEAP_SIZE=524288 CFG_RPMB_WRITE_KEY=1 \
+		CFG_CORE_HEAP_SIZE=524288 CFG_CORE_DYN_SHM=y CFG_RPMB_TESTKEY=y \
+		CFG_RPMB_WRITE_KEY=1 \
+		CFG_REE_FS=n CFG_CORE_ARM64_PA_BITS=48  \
+		CFG_TEE_CORE_LOG_LEVEL=1 CFG_TEE_TA_LOG_LEVEL=1 \
+		CFG_SCTLR_ALIGNMENT_CHECK=n 
+	popd
+fi
+
+# Build fTPM
+pushd MSRSec
+git submodule update --init
+popd
+pushd MSRSec/TAs/optee_ta
+TA_CPU=cortex-a53 TA_CROSS_COMPILE=aarch64-linux-gnu- \
+	TA_DEV_KIT_DIR=../../../../optee_os/out/arm-plat-vexpress/export-ta_arm64 \
+	CFG_TEE_TA_LOG_LEVEL=1 CFG_ARM64_ta_arm64=y CFG_FTPM_USE_WOLF=y make -j1 ftpm
+popd
+
+# Build OP-TEE with fTPM + StMM
 cp Build/MmStandaloneRpmb/RELEASE_GCC5/FV/BL32_AP_MM.fd optee_os
 pushd optee_os
+patch -p1 < ../patches/98d0ee60faba058fd888b6226d0c2f65de2c0ed5.patch
 export ARCH=arm
 CROSS_COMPILE32=arm-linux-gnueabihf- make -j32 CFG_ARM64_core=y \
 	PLATFORM=vexpress-qemu_armv8a CFG_STMM_PATH=BL32_AP_MM.fd CFG_RPMB_FS=y \
-	CFG_RPMB_FS_DEV_ID=1 CFG_CORE_HEAP_SIZE=524288 CFG_RPMB_WRITE_KEY=1
+	CFG_RPMB_FS_DEV_ID=0 CFG_CORE_HEAP_SIZE=524288 CFG_RPMB_WRITE_KEY=1 \
+	CFG_CORE_HEAP_SIZE=524288 CFG_CORE_DYN_SHM=y CFG_RPMB_TESTKEY=y \
+	CFG_RPMB_WRITE_KEY=1 \
+	CFG_REE_FS=n CFG_CORE_ARM64_PA_BITS=48  \
+	CFG_SCTLR_ALIGNMENT_CHECK=n \
+	CFG_TEE_CORE_LOG_LEVEL=1 CFG_TEE_TA_LOG_LEVEL=1 \
+	EARLY_TA_PATHS=../MSRSec/TAs/optee_ta/out/fTPM/bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf
 popd
 
 # Build U-Boot
@@ -48,6 +80,10 @@ export ARCH=arm64
 
 pushd u-boot
 patch -p1 < ../patches/0002-rpmb-emulation-hack.-Breaks-proper-hardware-support.patch
+patch -p1 < ../patches/0001-tpm-Add-some-headers-from-the-spec.patch
+patch -p1 < ../patches/0002-efi-Add-basic-EFI_TCG2_PROTOCOL-support.patch
+patch -p1 < ../patches/0001-efi_selftest-provide-unit-test-for-the-EFI_TCG2_PROT.patch
+cp ../qemu_tfa_mm_defconfig configs
 make qemu_tfa_mm_defconfig 
 make -j$(nproc)
 popd
@@ -76,9 +112,9 @@ echo
 echo "#################### BUILD DONE ####################"
 echo "cd output "
 echo "SEMI-HOSTING:  "
-echo "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios bl1.bin -machine virt,secure=on -d unimp -semihosting-config enable,target=native -serial tcp::5000,server,nowait -gdb tcp::1234"
+echo  "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios bl1.bin -machine virt,secure=on -d unimp -semihosting-config enable,target=native -serial tcp::5000,server,nowait -gdb tcp::1234 -dtb virt.dtb"
 echo "FIP: "
-echo "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios flash.bin -machine virt,secure=on -d unimp -serial tcp::5000,server,nowait -gdb tcp::1234"
+echo -e "sudo qemu-system-aarch64 -m 1024 -smp 2 -show-cursor -serial stdio -monitor null -nographic -cpu cortex-a57 -bios flash.bin -machine virt,secure=on -d unimp -serial tcp::5000,server,nowait -gdb tcp::1234 -dtb virt.dtb"
 
 echo 
 echo "For secure UART debugging"

@@ -5,3 +5,4 @@ arm-trusted-firmware
 u-boot
 output
 optee_os
+MSRSec
