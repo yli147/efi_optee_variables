@@ -61,7 +61,6 @@ popd
 # Build OP-TEE with fTPM + StMM
 cp Build/MmStandaloneRpmb/RELEASE_GCC5/FV/BL32_AP_MM.fd optee_os
 pushd optee_os
-patch -p1 < ../patches/98d0ee60faba058fd888b6226d0c2f65de2c0ed5.patch
 export ARCH=arm
 CROSS_COMPILE32=arm-linux-gnueabihf- make -j32 CFG_ARM64_core=y \
 	PLATFORM=vexpress-qemu_armv8a CFG_STMM_PATH=BL32_AP_MM.fd CFG_RPMB_FS=y \
@@ -80,9 +79,6 @@ export ARCH=arm64
 
 pushd u-boot
 patch -p1 < ../patches/0002-rpmb-emulation-hack.-Breaks-proper-hardware-support.patch
-patch -p1 < ../patches/0001-tpm-Add-some-headers-from-the-spec.patch
-patch -p1 < ../patches/0002-efi-Add-basic-EFI_TCG2_PROTOCOL-support.patch
-patch -p1 < ../patches/0001-efi_selftest-provide-unit-test-for-the-EFI_TCG2_PROT.patch
 cp ../qemu_tfa_mm_defconfig configs
 make qemu_tfa_mm_defconfig 
 make -j$(nproc)
