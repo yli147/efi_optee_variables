@@ -34,7 +34,7 @@ build -p $ACTIVE_PLATFORM -b RELEASE -a AARCH64 -t GCC5 -n `nproc` -D DO_X86EMU=
 cp Build/MmStandaloneRpmb/RELEASE_GCC5/FV/BL32_AP_MM.fd optee_os
 
 # Build OP-TEE for the devkit
-if [ !-d 'optee_os/out/arm-plat-vexpress/export-ta_arm64' ]; then
+if [ ! -d 'optee_os/out/arm-plat-vexpress/export-ta_arm64' ]; then
 	pushd optee_os
 	export ARCH=arm
 	CROSS_COMPILE32=arm-linux-gnueabihf- make -j32 CFG_ARM64_core=y \
@@ -78,7 +78,9 @@ export CROSS_COMPILE=aarch64-linux-gnu-
 export ARCH=arm64
 
 pushd u-boot
-patch -p1 < ../patches/0002-rpmb-emulation-hack.-Breaks-proper-hardware-support.patch
+for i in `ls ../patches`; do
+patch -p1 < $i
+done
 cp ../qemu_tfa_mm_defconfig configs
 make qemu_tfa_mm_defconfig 
 make -j$(nproc)
