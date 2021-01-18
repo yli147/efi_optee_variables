@@ -79,7 +79,7 @@ export ARCH=arm64
 
 pushd u-boot
 for i in `ls ../patches`; do
-patch -p1 < $i
+patch -p1 < ../patches/$i
 done
 cp ../qemu_tfa_mm_defconfig configs
 make qemu_tfa_mm_defconfig 
