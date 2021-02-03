@@ -2,7 +2,7 @@
 set -e
 
 [ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
-[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2-platforms.git -b ffa_svc_optional_on_upstream
+[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm
 [ ! -d 'edk2' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2.git -b ffa_svc_optional_on_upstream
 [ ! -d 'optee_os' ] && git clone https://github.com/OP-TEE/optee_os.git -b master
 [ ! -d 'arm-trusted-firmware' ] && git clone https://github.com/ARM-software/arm-trusted-firmware.git -b master

@@ -28,20 +28,6 @@ Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
  create mode 100644 drivers/tee/optee/sha2.c
  create mode 100644 drivers/tee/optee/sha2.h
 
-diff --git a/arch/arm/include/asm/gpio.h b/arch/arm/include/asm/gpio.h
-index 6ecb876eda51..ef66c21d6e4e 100644
---- a/arch/arm/include/asm/gpio.h
-+++ b/arch/arm/include/asm/gpio.h
-@@ -3,7 +3,8 @@
- 	!defined(CONFIG_ARCH_BCM6858) && !defined(CONFIG_ARCH_BCM63158) && \
- 	!defined(CONFIG_ARCH_ROCKCHIP) && !defined(CONFIG_ARCH_ASPEED) && \
- 	!defined(CONFIG_ARCH_U8500) && !defined(CONFIG_CORTINA_PLATFORM) && \
--	!defined(CONFIG_TARGET_BCMNS3) && !defined(CONFIG_TARGET_TOTAL_COMPUTE)
-+	!defined(CONFIG_TARGET_BCMNS3) && !defined(CONFIG_TARGET_TOTAL_COMPUTE) && \
-+   !defined(CONFIG_TARGET_QEMU_ARM_64BIT)
- #include <asm/arch/gpio.h>
- #endif
- #include <asm-generic/gpio.h>
 diff --git a/arch/arm/include/asm/ioctl.h b/arch/arm/include/asm/ioctl.h
 new file mode 100644
 index 000000000000..b279fe06dfe5
