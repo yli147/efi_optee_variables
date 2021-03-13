@@ -2,8 +2,8 @@
 set -e
 
 [ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
-[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm
-[ ! -d 'edk2' ] && git clone https://git.linaro.org/people/sughosh.ganu/edk2.git -b ffa_svc_optional_on_upstream
+[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm2
+[ ! -d 'edk2' ] && git clone https://github.com/tianocore/edk2.git
 [ ! -d 'optee_os' ] && git clone https://github.com/OP-TEE/optee_os.git -b master
 [ ! -d 'arm-trusted-firmware' ] && git clone https://github.com/ARM-software/arm-trusted-firmware.git -b master
 [ ! -d 'MSRSec' ] && git clone https://github.com/microsoft/MSRSec.git
@@ -20,7 +20,7 @@ done
 # Build EDK2
 export WORKSPACE=$(pwd)
 export PACKAGES_PATH=$WORKSPACE/edk2:$WORKSPACE/edk2-platforms
-export ACTIVE_PLATFORM="Platform/StMMRpmb/PlatformStandaloneMm.dsc"
+export ACTIVE_PLATFORM="Platform/StandaloneMm/PlatformStandaloneMmPkg/PlatformStandaloneMmRpmb.dsc"
 export GCC5_AARCH64_PREFIX=aarch64-linux-gnu-
 
 pushd edk2
