@@ -2,7 +2,7 @@
 set -e
 
 [ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
-[ ! -d 'edk2-platforms' ] && git clone https://git.linaro.org/people/ilias.apalodimas/edk2-platforms.git -b stmm2
+[ ! -d 'edk2-platforms' ] && git clone https://github.com/tianocore/edk2-platforms.git
 [ ! -d 'edk2' ] && git clone https://github.com/tianocore/edk2.git
 [ ! -d 'optee_os' ] && git clone https://github.com/OP-TEE/optee_os.git -b master
 [ ! -d 'arm-trusted-firmware' ] && git clone https://github.com/ARM-software/arm-trusted-firmware.git -b master
@@ -49,14 +49,14 @@ if [ ! -d 'optee_os/out/arm-plat-vexpress/export-ta_arm64' ]; then
 fi
 
 # Build fTPM
-pushd MSRSec
-git submodule update --init
-popd
-pushd MSRSec/TAs/optee_ta
-TA_CPU=cortex-a53 TA_CROSS_COMPILE=aarch64-linux-gnu- \
-	TA_DEV_KIT_DIR=../../../../optee_os/out/arm-plat-vexpress/export-ta_arm64 \
-	CFG_TEE_TA_LOG_LEVEL=1 CFG_ARM64_ta_arm64=y CFG_FTPM_USE_WOLF=y make -j1 ftpm
-popd
+#pushd MSRSec
+#git submodule update --init
+#popd
+#pushd MSRSec/TAs/optee_ta
+#TA_CPU=cortex-a53 TA_CROSS_COMPILE=aarch64-linux-gnu- \
+	#TA_DEV_KIT_DIR=../../../../optee_os/out/arm-plat-vexpress/export-ta_arm64 \
+	#CFG_TEE_TA_LOG_LEVEL=1 CFG_ARM64_ta_arm64=y CFG_FTPM_USE_WOLF=y make -j1 ftpm
+#popd
 
 # Build OP-TEE with fTPM + StMM
 cp Build/MmStandaloneRpmb/RELEASE_GCC5/FV/BL32_AP_MM.fd optee_os
@@ -69,8 +69,8 @@ CROSS_COMPILE32=arm-linux-gnueabihf- make -j32 CFG_ARM64_core=y \
 	CFG_RPMB_WRITE_KEY=1 \
 	CFG_REE_FS=n CFG_CORE_ARM64_PA_BITS=48  \
 	CFG_SCTLR_ALIGNMENT_CHECK=n \
-	CFG_TEE_CORE_LOG_LEVEL=1 CFG_TEE_TA_LOG_LEVEL=1 \
-	EARLY_TA_PATHS=../MSRSec/TAs/optee_ta/out/fTPM/bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf
+	CFG_TEE_CORE_LOG_LEVEL=1 CFG_TEE_TA_LOG_LEVEL=1
+	#EARLY_TA_PATHS=../MSRSec/TAs/optee_ta/out/fTPM/bc50d971-d4c9-42c4-82cb-343fb7f37896.stripped.elf
 popd
 
 # Build U-Boot
