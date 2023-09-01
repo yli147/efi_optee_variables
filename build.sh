@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-[ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b master
+[ ! -d 'u-boot' ] && git clone https://github.com/u-boot/u-boot.git -b v2021.04
 [ ! -d 'edk2-platforms' ] && git clone https://github.com/tianocore/edk2-platforms.git
 [ ! -d 'edk2' ] && git clone https://github.com/tianocore/edk2.git
 [ ! -d 'optee_os' ] && git clone https://github.com/OP-TEE/optee_os.git -b master
 [ ! -d 'arm-trusted-firmware' ] && git clone https://github.com/ARM-software/arm-trusted-firmware.git -b master
 [ ! -d 'MSRSec' ] && git clone https://github.com/microsoft/MSRSec.git
 
-clean_dirs='u-boot edk2 edk2-platforms optee_os arm-trusted-firmware MSRSec'
+clean_dirs='edk2 edk2-platforms optee_os arm-trusted-firmware MSRSec'
 for i in $clean_dirs; do
 	pushd "$i"
 	git clean -d -f
